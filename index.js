@@ -23,7 +23,7 @@ function Sliding(data, size) {
 
     for(i = 0; i < data.length - size - 1; i++)
         ret.push({
-            input: data.slice(i, i + size),
+            input: Array.prototype.slice.call(data.slice(i, i + size)),
             label: data[i+1]
         });
 
