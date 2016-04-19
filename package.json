@@ -1,0 +1,22 @@
+{
+  "name": "neural-network-sliding-window",
+  "version": "1.0.0",
+  "description": "A sample neural network which is variable length on a sliding window",
+  "main": "index.js",
+  "bin": {
+    "neural-network-sliding-window": "cli.js"
+  },
+  "dependencies": {
+    "commander": "^2.9.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": {
+    "name": "Maurice Prosper",
+    "email": "maurice.prosper@ttu.edu",
+    "url": "http://mauriceprosper.com"
+  },
+  "license": "ISC"
+}
