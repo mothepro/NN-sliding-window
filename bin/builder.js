@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const package   = require('../package.json');
 const program   = require('commander');
-const sliding   = require('..');
+const sliding   = require('../lib/sliding.js');
 const fs        = require('fs');
 
 program

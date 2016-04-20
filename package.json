@@ -2,9 +2,8 @@
   "name": "neural-network-sliding-window",
   "version": "1.0.0",
   "description": "A sample neural network which is variable length on a sliding window",
-  "main": "index.js",
   "bin": {
-    "neural-network-sliding-window": "cli.js"
+    "build-sliding-window": "builder.js"
   },
   "dependencies": {
     "commander": "^2.9.0"
