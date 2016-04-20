@@ -20,15 +20,17 @@ function Sliding(data, size, onehot) {
     // convert all at once
     convert(data);
 
-    for(windowSize = 0; windowSize < data.length - size - 1; windowSize++) {
+    for(var windowOffset = 0; windowOffset < data.length - size - 1; windowOffset++) {
+        label = data[windowOffset + size];
+
         if(onehot) {
-            label = [0, 0, 0, 0];
-            label[data[windowSize + size + 1]] = 1;
-        } else
-            label = data[windowSize + size + 1];
+            tmp = [0, 0, 0, 0];
+            tmp[label] = 1;
+            label = tmp;
+        }
         
         ret.push({
-            input: Array.prototype.slice.call(data.slice(windowSize, windowSize + size)),
+            input: Array.prototype.slice.call(data.slice(windowOffset, windowOffset + size)),
             label: label
         });
     }
