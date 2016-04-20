@@ -14,18 +14,24 @@ var convert = function (a) {
     return a - 97; //'a'.charCodeAt();
 };
 
-function Sliding(data, size) {
+function Sliding(data, size, onehot) {
     var ret = [],
-        i, j, input;
+        i, j, input, label;
 
     // convert all at once
     convert(data);
 
-    for(i = 0; i < data.length - size - 1; i++)
+    for(windowSize = 0; windowSize < data.length - size - 1; windowSize++) {
+        if(onehot) {
+            label = [0, 0, 0, 0];
+            label[data[windowSize + 1]] = 1;
+        } else
+            label = data[windowSize + 1];
         ret.push({
-            input: Array.prototype.slice.call(data.slice(i, i + size)),
-            label: data[i+1]
+            input: Array.prototype.slice.call(data.slice(windowSize, windowSize + size)),
+            label: label
         });
+    }
 
     return ret;
 }
