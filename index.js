@@ -1,9 +1,8 @@
 /**
- * Created by Mo on 4/19/2016.
+ * Normalize an Uint8Array list
+ * around 'a'
  */
-
-// chars to ints
-var convert = function (a) {
+function convert(a) {
     if(Object.prototype.toString.call(a) === "[object Uint8Array]") {
         a.forEach(function (v, k) {
             a[k] = convert(v);
@@ -12,7 +11,7 @@ var convert = function (a) {
     }
 
     return a - 97; //'a'.charCodeAt();
-};
+}
 
 function Sliding(data, size, onehot) {
     var ret = [],
@@ -24,9 +23,10 @@ function Sliding(data, size, onehot) {
     for(windowSize = 0; windowSize < data.length - size - 1; windowSize++) {
         if(onehot) {
             label = [0, 0, 0, 0];
-            label[data[windowSize + 1]] = 1;
+            label[data[windowSize + size + 1]] = 1;
         } else
-            label = data[windowSize + 1];
+            label = data[windowSize + size + 1];
+        
         ret.push({
             input: Array.prototype.slice.call(data.slice(windowSize, windowSize + size)),
             label: label
