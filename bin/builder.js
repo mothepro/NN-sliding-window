@@ -1,11 +1,12 @@
 #!/usr/bin/env node
-const package   = require('../package.json');
+const pkg       = require('../package.json');
 const program   = require('commander');
 const sliding   = require('../lib/sliding.js');
 const fs        = require('fs');
 
 program
-    .version(package.version)
+    .version(pkg.version)
+    .description(pkg.description)
     .usage('[options] <file ...>')
     .option('-s, --window-size <int>', 'size of the Sliding window', function(a){ return parseInt(a, 10); })
     .option('-o, --output <file>', 'path to save the sliding output [use % to replace with window size]')
@@ -13,13 +14,13 @@ program
     .option('-r, --range <a>..<b>', 'a range of windows', function (val) { return val.split('..').map(Number); })
     .option('--one-hot', 'make the label a one hot vector')
     .parse(process.argv);
-program.range = program.range || [];
 
 // turn one size into a 'range'
 if(program.windowOffset)
     program.range[0] = program.range[1] = program.windowOffset;
 
 // we need a window size
+// program.range = program.range || [];
 if(program.range.length !== 2 || !program.input)
     program.help();
     
@@ -33,7 +34,7 @@ for(var ws = program.range[0]; ws <= program.range[1]; ws++) {
         output = sliding(data, ws, program.oneHot);
 
     if (program.output) {
-        fs.writeFile(outFile, JSON.stringify(output), function (err, ret) {if (err) throw err;});
+        fs.writeFileSync(outFile, JSON.stringify(output));
         console.log('Sliding window [%d] "%s" -> "%s"', ws, program.input, outFile);
     } else
         console.log(output);
