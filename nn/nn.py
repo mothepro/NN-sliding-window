@@ -64,7 +64,7 @@ learning_rate = 0.05
 # read from file
 trX = []
 trY = []
-path = 'build/data-'+ str(dataSet) +'-'+ str(input_layer) +'.json'
+path = '../build/data-'+ str(dataSet) +'-'+ str(input_layer) +'.json'
 
 with open(path) as file:
     print("Reading {:s} for {:d} input neurons".format(path, input_layer))
