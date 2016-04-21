@@ -118,7 +118,7 @@ with tf.Session() as sess:
             ))
 
             # Attempt this batch
-            print("Test>> Iteration: {:d}\tAccuracy: {:.7f}\tAggregate: {:.7f}".format(i, accuracy[start//batch], np.average(accuracy)))
+            print("Test>> Iteration: {:d}\tBatch: {:d}\tStep: {:d}\tAccuracy: {:.7f}\tAggregate: {:.7f}".format(i, start//batch, i*(len(trX)//batch)+(start//batch), accuracy[start//batch], np.average(accuracy)))
 
             # Then train on it
             sess.run(train_op, feed_dict={X: trX[start:end], Y: trY[start:end]})
