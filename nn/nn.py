@@ -69,7 +69,7 @@ path = 'build/data-'+ str(dataSet) +'-'+ str(input_layer) +'.json'
 with open(path) as file:
     print("Reading {:s} for {:d} input neurons".format(path, input_layer))
     jData = json.load(file)
-    shuffle(jData)
+    # shuffle(jData)
     for v in jData:
         trX.append(v.get('input'))
         trY.append(v.get('label'))
