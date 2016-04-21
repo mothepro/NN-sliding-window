@@ -106,10 +106,10 @@ with tf.Session() as sess:
 
     # Lets train over this set a few times
     for i in range(iterations):
-        aggregate = 0
+        accuracy = []
 
         for start, end in zip(range(0, len(trX), batch), range(batch, len(trX), batch)):
-            accuracy = np.mean(
+            accuracy[ start//batch ] = np.mean(
                 np.argmax(trY[start:end], axis=1) ==
                 sess.run(predict_op, feed_dict={
                     X: trX[start:end],
@@ -117,10 +117,8 @@ with tf.Session() as sess:
                 })
             )
 
-            aggregate = (accuracy + aggregate) / ((start//batch)+1)
-
             # Attempt this batch
-            print("Test>> Iteration: {:d}\tAccuracy: {:.7f}\tAggregate: {:.7f}".format(i, accuracy, aggregate))
+            print("Test>> Iteration: {:d}\tAccuracy: {:.7f}\tAggregate: {:.7f}".format(i, accuracy[start//batch], np.average(accuracy)))
 
             # Then train on it
             sess.run(train_op, feed_dict={X: trX[start:end], Y: trY[start:end]})
