@@ -14,7 +14,7 @@ import sys, getopt
 ###################
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:],"d:i:h:b:a",["data-set=","input-neurons=","hidden-neurons=","batch-size=","aggregate="])
+    opts, args = getopt.getopt(sys.argv[1:],"d:i:h:b:",["data-set=","input-neurons=","hidden-neurons=","batch-size="])
 except getopt.GetoptError:
     sys.exit(2)
 
@@ -27,8 +27,6 @@ for opt, arg in opts:
         hidden_layer = int(arg)
     elif opt in ("-b", "--batch-size"):
         batch = int(arg)
-    elif opt in ("-a", "--aggregate"):
-        aggregate = True
 
 ####################
 # Hyper Parameters #
@@ -108,9 +106,10 @@ with tf.Session() as sess:
 
     # Lets train over this set a few times
     for i in range(iterations):
-        accuracy = 0
+        aggregate = 0
+
         for start, end in zip(range(0, len(trX), batch), range(batch, len(trX), batch)):
-            tst = np.mean(
+            accuracy = np.mean(
                 np.argmax(trY[start:end], axis=1) ==
                 sess.run(predict_op, feed_dict={
                     X: trX[start:end],
@@ -118,13 +117,10 @@ with tf.Session() as sess:
                 })
             )
 
-            if aggregate:
-                accuracy = (tst + accuracy) / ((start//batch)+1)
-            else:
-                accuracy = tst
+            aggregate = (accuracy + aggregate) / ((start//batch)+1)
 
             # Attempt this batch
-            print("Test>> Iteration: {:d}\tAccuracy: {:.7f}".format(i, accuracy))
+            print("Test>> Iteration: {:d}\tAccuracy: {:.7f}\tAggregate: {:.7f}".format(i, accuracy, aggregate))
 
             # Then train on it
             sess.run(train_op, feed_dict={X: trX[start:end], Y: trY[start:end]})
