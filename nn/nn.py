@@ -91,7 +91,7 @@ def model(X, w_h, w_o):
 X = tf.placeholder("float", [None, input_layer])
 Y = tf.placeholder("float", [None, output_layer])
 
-w_h = init_weights([input_layer, hidden_layer]) # create symbolic variables
+w_h = init_weights([input_layer, hidden_layer])
 w_o = init_weights([hidden_layer, output_layer])
 
 py_x = model(X, w_h, w_o)
@@ -109,13 +109,13 @@ with tf.Session() as sess:
         accuracy = []
 
         for start, end in zip(range(0, len(trX), batch), range(batch, len(trX), batch)):
-            accuracy[ start//batch ] = np.mean(
+            accuracy.append(np.mean(
                 np.argmax(trY[start:end], axis=1) ==
                 sess.run(predict_op, feed_dict={
                     X: trX[start:end],
                     Y: trY[start:end]
                 })
-            )
+            ))
 
             # Attempt this batch
             print("Test>> Iteration: {:d}\tAccuracy: {:.7f}\tAggregate: {:.7f}".format(i, accuracy[start//batch], np.average(accuracy)))
