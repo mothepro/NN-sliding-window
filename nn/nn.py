@@ -14,72 +14,81 @@ import sys, getopt
 ###################
 
 try:
-	opts, args = getopt.getopt(sys.argv[1:],"d:i:",["data-set=","input-neurons="])
+    opts, args = getopt.getopt(sys.argv[1:],"d:i:h:b:a",["data-set=","input-neurons=","hidden-neurons=","batch-size=","aggregate="])
 except getopt.GetoptError:
-	sys.exit(2)
+    sys.exit(2)
 
 for opt, arg in opts:
-	if opt in ("-i", "--input-neurons"):
-		input_layer = int(arg)
-	elif opt in ("-d", "--data-set"):
-		dataSet = int(arg)
+    if opt in ("-i", "--input-neurons"):
+        input_layer = int(arg)
+    elif opt in ("-d", "--data-set"):
+        dataSet = int(arg)
+    elif opt in ("-h", "--hidden-neurons"):
+        hidden_layer = int(arg)
+    elif opt in ("-b", "--batch-size"):
+        batch = int(arg)
+    elif opt in ("-a", "--aggregate"):
+        aggregate = True
 
 ####################
 # Hyper Parameters #
 ####################
 
 try:
-	dataSet
+    dataSet
 except NameError:
-	dataSet = 2
+    dataSet = 2
 
 try:
-	input_layer
+    input_layer
 except NameError:
-	input_layer = 20
+    input_layer = 4
 
-iterations = 100
-batch = 128
-hidden_layer = 45 # int(input_layer * 1.5)
+try:
+    hidden_layer
+except NameError:
+    hidden_layer = 20
+
+try:
+    batch
+except NameError:
+    batch = 128
+
+try:
+    aggregate
+except NameError:
+    aggregate = False
+
+iterations = 1
 output_layer = 4
 learning_rate = 0.05
 
 # read from file
 trX = []
 trY = []
-teX = []
-teY = []
 path = 'build/data-'+ str(dataSet) +'-'+ str(input_layer) +'.json'
 
 with open(path) as file:
-	print("Reading {:s} for {:d} input neurons".format(path, input_layer))
-	jData = json.load(file)
-	shuffle(jData)
-	for v in jData:
-		trX.append(v.get('input'))
-		trY.append(v.get('label'))
+    print("Reading {:s} for {:d} input neurons".format(path, input_layer))
+    jData = json.load(file)
+    shuffle(jData)
+    for v in jData:
+        trX.append(v.get('input'))
+        trY.append(v.get('label'))
 
-# Split training & test sets
-size = int(len(trX) * .8)
-
-teX = trX[size:]
-teY = trY[size:]
-trX = trX[:size]
-trY = trY[:size]
-
-print("Using {:d} Training sets and {:d} Test sets".format(len(trX), len(teX)))
+print("Using {:d} Training sets".format(len(trX)))
 
 ########################
 # Build Neural Network #
 ########################
 
 def init_weights(shape):
-	return tf.Variable(tf.random_normal(shape, stddev=0.01))
+    return tf.Variable(tf.random_normal(shape, stddev=0.01))
 
 
 def model(X, w_h, w_o):
-	h = tf.nn.tanh(tf.matmul(X, w_h)) # this is a basic mlp, think 2 stacked logistic regressions
-	return tf.matmul(h, w_o) # note that we dont take the softmax at the end because our cost fn does that for us
+    h = tf.nn.tanh(tf.matmul(X, w_h)) # this is a basic mlp, think 2 stacked logistic regressions
+    return tf.matmul(h, w_o) # note that we dont take the softmax at the end because our cost fn does that for us
 
 X = tf.placeholder("float", [None, input_layer])
 Y = tf.placeholder("float", [None, output_layer])
@@ -95,14 +104,30 @@ predict_op = tf.argmax(py_x, 1)
 
 # Launch the graph in a session
 with tf.Session() as sess:
-	tf.initialize_all_variables().run()
+    tf.initialize_all_variables().run()
 
-	# Test with the untrained NN
-	print("Guess>> Accuracy: {:.7f}".format(np.mean(np.argmax(teY, axis=1) == sess.run(predict_op, feed_dict={X: teX, Y: teY}))))
+    # Lets train over this set a few times
+    for i in range(iterations):
+        accuracy = 0
+        for start, end in zip(range(0, len(trX), batch), range(batch, len(trX), batch)):
+            tst = np.mean(
+                np.argmax(trY[start:end], axis=1) ==
+                sess.run(predict_op, feed_dict={
+                    X: trX[start:end],
+                    Y: trY[start:end]
+                })
+            )
 
-	# Lets train over this set a few times
-	for i in range(iterations):
-		for start, end in zip(range(0, len(trX), batch), range(batch, len(trX), batch)):
-			sess.run(train_op, feed_dict={X: trX[start:end], Y: trY[start:end]})
-			print("Train>> Iteration: {:d}\tBatch: {:d}\tStep: {:d}\tTimestamp: {:.6f}".format(i, start//batch, i*(len(trX)//batch)+(start//batch), time.time() ))
-		print("Test>> Iteration: {:d}\tAccuracy: {:.7f}".format(i, np.mean(np.argmax(teY, axis=1) == sess.run(predict_op, feed_dict={X: teX, Y: teY}))))
+            if aggregate:
+                accuracy = (tst + accuracy) / ((start//batch)+1)
+            else:
+                accuracy = tst
+
+            # Attempt this batch
+            print("Test>> Iteration: {:d}\tAccuracy: {:.7f}".format(i, accuracy))
+
+            # Then train on it
+            sess.run(train_op, feed_dict={X: trX[start:end], Y: trY[start:end]})
+
+            # Log the train duration
+            print("Train>> Iteration: {:d}\tBatch: {:d}\tStep: {:d}\tTimestamp: {:.6f}".format(i, start//batch, i*(len(trX)//batch)+(start//batch), time.time() ))
